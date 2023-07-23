@@ -1,0 +1,111 @@
+# Step 1: Define the BankAccount class
+class BankAccount:
+    def __init__(self, account_number, account_holder, balance=0):
+        self._account_number = account_number
+        self.account_holder = account_holder
+        self._balance = balance
+
+    def deposit(self, amount):
+        try:
+            if amount <= 0:
+                raise ValueError("Deposit amount must be positive.")
+            self._balance += amount
+        except ValueError as e:
+            print(e)
+
+    def withdraw(self, amount):
+        try:
+            if amount <= 0:
+                raise ValueError("Withdrawal amount must be positive.")
+            if self._balance >= amount:
+                self._balance -= amount
+            else:
+                raise ValueError("Insufficient funds!")
+        except ValueError as e:
+            print(e)
+
+    def get_balance(self):
+        return self._balance
+
+    def set_balance(self, new_balance):
+        if new_balance >= 0:
+            self._balance = new_balance
+        else:
+            print("Balance cannot be negative.")
+
+    def get_account_number(self):
+        return self._account_number
+
+# Step 2: Define the SavingsAccount class (subclass of BankAccount)
+class SavingsAccount(BankAccount):
+    def __init__(self, account_number, account_holder, balance=0, interest_rate=0.01):
+        super().__init__(account_number, account_holder, balance)
+        self._interest_rate = interest_rate
+
+    def add_interest(self):
+        interest_amount = self._balance * self._interest_rate
+        self.deposit(interest_amount)
+
+    def get_interest_rate(self):
+        return self._interest_rate
+
+    def withdraw(self, amount):
+        try:
+            withdrawal_fee = 10
+            total_withdrawal_amount = amount + withdrawal_fee
+
+            if amount <= 0:
+                raise ValueError("Withdrawal amount must be positive.")
+            if self._balance >= total_withdrawal_amount:
+                self._balance -= total_withdrawal_amount
+            else:
+                raise ValueError("Insufficient funds!")
+        except ValueError as e:
+            print(e)
+
+# Step 3: Add file handling functions
+def save_account_details(accounts, filename):
+    with open(filename, "w") as file:
+        for account in accounts:
+            file.write(f"{account.get_account_number()},{account.account_holder},{account.get_balance()}\n")
+
+def load_account_details(filename):
+    accounts = []
+    with open(filename, "r") as file:
+        for line in file:
+            account_data = line.strip().split(",")
+            account_number = account_data[0]
+            account_holder = account_data[1]
+            balance = float(account_data[2])
+            accounts.append(BankAccount(account_number, account_holder, balance))
+    return accounts
+
+# Step 4: Create instances and test file handling
+if __name__ == "__main__":
+    # Create a regular bank account
+    account1 = BankAccount("12345", "John Doe")
+
+    # Create a savings account
+    account2 = SavingsAccount("67890", "Jane Smith", balance=1000, interest_rate=0.05)
+
+    # Deposit some money into both accounts
+    account1.deposit(500)
+    account2.deposit(1000)
+
+    # Withdraw some money from both accounts
+    account1.withdraw(200)
+    account2.withdraw(300)
+
+    # Add interest to the savings account
+    account2.add_interest()
+
+    # Save account details to file
+    accounts_list = [account1, account2]
+    save_account_details(accounts_list, "accounts.txt")
+
+    # Load account details from file
+    loaded_accounts = load_account_details("accounts.txt")
+
+    # Print the loaded account details
+    for account in loaded_accounts:
+        print(f"Account Number: {account.get_account_number()}, Account Holder: {account.account_holder}, Balance: {account.get_balance()}")
